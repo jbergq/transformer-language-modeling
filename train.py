@@ -23,7 +23,7 @@ vocab = build_vocab_from_iterator(yield_tokens(train_iter), specials=["<unk>"])
 vocab.set_default_index(vocab["<unk>"])
 vocab_size = len(vocab)
 
-model = Transformer(vocab_size, 512)
+model = Transformer(vocab_size, 100, 512)
 
 
 for i, (label, line) in enumerate(train_iter):
