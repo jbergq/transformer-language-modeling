@@ -20,22 +20,17 @@ class Decoder(nn.Module):
 
         self.decoder = []
         for _ in range(num_blocks):
-            self.decoder.append(
-                DecoderBlock(
-                    hidden_size=hidden_size,
-                    ff_hidden_size=ff_hidden_size,
-                    num_heads=num_heads,
-                )
-            )
+            self.decoder.append(DecoderBlock(hidden_size, ff_hidden_size, num_heads))
+
         self.decoder = nn.ModuleList(self.decoder)
 
         self.lin_final = nn.Linear(hidden_size, vocab_size)
 
-    def forward(self, tgt, src_enc):
+    def forward(self, tgt, src_enc, tgt_mask):
         tgt = self.embedding(tgt)
 
         for block in self.decoder:
-            tgt = block(tgt, src_enc)
+            tgt = block(tgt, src_enc, tgt_mask)
 
         out = self.lin_final(tgt)
 

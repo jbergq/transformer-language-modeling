@@ -17,12 +17,12 @@ class MultiHeadAttention(nn.Module):
 
         self.lin_concat = nn.Linear(hidden_size, embedding_size)
 
-    def forward(self, q, k, v):
+    def forward(self, q, k, v, mask=None):
         q, k, v = self.lin_q(q), self.lin_k(k), self.lin_v(v)
 
         q, k, v = self.split(q), self.split(k), self.split(v)
 
-        out = self.attention(q, k, v)
+        out = self.attention(q, k, v, mask)
 
         out = self.concat(out)
         out = self.lin_concat(out)

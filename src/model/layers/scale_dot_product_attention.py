@@ -8,12 +8,14 @@ class ScaleDotProductAttention(nn.Module):
 
         self.softmax = nn.Softmax(dim=-1)
 
-    def forward(self, q, k, v):
+    def forward(self, q, k, v, mask=None):
         batch_size, head, seq_length, head_size = k.shape
 
-        w = q @ k.transpose(2, 3)
-        w = w / math.sqrt(head_size)
+        score = (q @ k.transpose(2, 3)) / math.sqrt(head_size)
 
-        a = self.softmax(w)
+        if mask is not None:
+            score = score.masked_fill(mask == 0, -1e9)
 
-        return a @ v
+        score = self.softmax(score)
+
+        return score @ v

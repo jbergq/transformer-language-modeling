@@ -20,13 +20,8 @@ class Encoder(nn.Module):
 
         self.encoder = []
         for _ in range(num_blocks):
-            self.encoder.append(
-                EncoderBlock(
-                    hidden_size=hidden_size,
-                    ff_hidden_size=ff_hidden_size,
-                    num_heads=num_heads,
-                )
-            )
+            self.encoder.append(EncoderBlock(hidden_size, ff_hidden_size, num_heads))
+
         self.encoder = nn.ModuleList(self.encoder)
 
     def forward(self, src):
