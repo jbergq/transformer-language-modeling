@@ -1,10 +1,10 @@
 import torch.nn as nn
 
 from .embedding.transformer_embedding import TransformerEmbedding
-from .layers.encoder_block import EncoderBlock
+from .layers.decoder_block import DecoderBlock
 
 
-class Encoder(nn.Module):
+class Decoder(nn.Module):
     def __init__(
         self,
         vocab_size,
@@ -19,11 +19,11 @@ class Encoder(nn.Module):
 
         self.embedding = TransformerEmbedding(vocab_size, max_seq_len, embedding_size)
 
-        self.encoder = []
+        self.decoder = []
 
         for _ in range(num_blocks):
-            self.encoder.append(
-                EncoderBlock(
+            self.decoder.append(
+                DecoderBlock(
                     in_size=embedding_size,
                     hidden_size=hidden_size,
                     ff_hidden_size=ff_hidden_size,
@@ -31,10 +31,7 @@ class Encoder(nn.Module):
                 )
             )
 
-        self.encoder = nn.Sequential(*self.encoder)
+        self.decoder = nn.Sequential(*self.decoder)
 
-    def forward(self, src):
-        x = self.embedding(src)
-        src_enc = self.encoder(x)
-
-        assert True
+    def forward(self, x):
+        pass

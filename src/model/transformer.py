@@ -1,6 +1,7 @@
 import torch.nn as nn
 
 from .encoder import Encoder
+from .decoder import Decoder
 
 
 class Transformer(nn.Module):
@@ -12,6 +13,9 @@ class Transformer(nn.Module):
         self.encoder = Encoder(
             vocab_size, max_seq_len, embedding_size, hidden_size, ff_hidden_size
         )
+        self.decoder = Decoder(
+            vocab_size, max_seq_len, embedding_size, hidden_size, ff_hidden_size
+        )
 
     def forward(self, src, tgt):
-        encoded = self.encoder(src, tgt)
+        src_enc = self.encoder(src)
