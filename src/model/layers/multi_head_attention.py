@@ -4,18 +4,18 @@ from .scale_dot_product_attention import ScaleDotProductAttention
 
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, in_size, hidden_size, num_heads=8):
+    def __init__(self, embedding_size, hidden_size, num_heads=8):
         super().__init__()
 
         self.num_heads = num_heads
 
         self.attention = ScaleDotProductAttention()
 
-        self.lin_q = nn.Linear(in_size, hidden_size)
-        self.lin_k = nn.Linear(in_size, hidden_size)
-        self.lin_v = nn.Linear(in_size, hidden_size)
+        self.lin_q = nn.Linear(embedding_size, hidden_size)
+        self.lin_k = nn.Linear(embedding_size, hidden_size)
+        self.lin_v = nn.Linear(embedding_size, hidden_size)
 
-        self.lin_concat = nn.Linear(hidden_size, hidden_size)
+        self.lin_concat = nn.Linear(hidden_size, embedding_size)
 
     def forward(self, q, k, v):
         q, k, v = self.lin_q(q), self.lin_k(k), self.lin_v(v)

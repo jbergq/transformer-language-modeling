@@ -7,7 +7,6 @@ from .feedforward_block import FeedForwardBlock
 class EncoderBlock(nn.Module):
     def __init__(
         self,
-        in_size,
         hidden_size,
         ff_hidden_size,
         num_heads,
@@ -16,7 +15,7 @@ class EncoderBlock(nn.Module):
     ):
         super().__init__()
 
-        self.attention = MultiHeadAttention(in_size, hidden_size, num_heads)
+        self.attention = MultiHeadAttention(hidden_size, hidden_size, num_heads)
 
         self.norm1 = nn.LayerNorm(hidden_size, eps=layer_norm_eps)
         self.dropout1 = nn.Dropout(dropout_prob)
@@ -32,10 +31,9 @@ class EncoderBlock(nn.Module):
         x = self.norm1(x + x_a)
         x = self.dropout1(x)
 
-        x_s = x
-        x = self.ff_block(x)
+        x_f = self.ff_block(x)
 
-        x = self.norm2(x + x_s)
+        x = self.norm2(x + x_f)
         x = self.dropout2(x)
 
         return x

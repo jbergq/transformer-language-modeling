@@ -9,7 +9,6 @@ class Encoder(nn.Module):
         self,
         vocab_size,
         max_seq_len,
-        embedding_size,
         hidden_size,
         ff_hidden_size,
         num_blocks=5,
@@ -17,24 +16,23 @@ class Encoder(nn.Module):
     ):
         super().__init__()
 
-        self.embedding = TransformerEmbedding(vocab_size, max_seq_len, embedding_size)
+        self.embedding = TransformerEmbedding(vocab_size, max_seq_len, hidden_size)
 
         self.encoder = []
-
         for _ in range(num_blocks):
             self.encoder.append(
                 EncoderBlock(
-                    in_size=embedding_size,
                     hidden_size=hidden_size,
                     ff_hidden_size=ff_hidden_size,
                     num_heads=num_heads,
                 )
             )
-
-        self.encoder = nn.Sequential(*self.encoder)
+        self.encoder = nn.ModuleList(self.encoder)
 
     def forward(self, src):
-        x = self.embedding(src)
-        src_enc = self.encoder(x)
+        src = self.embedding(src)
 
-        assert True
+        for block in self.encoder:
+            src = block(src)
+
+        return src

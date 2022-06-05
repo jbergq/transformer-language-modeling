@@ -9,7 +9,6 @@ class Decoder(nn.Module):
         self,
         vocab_size,
         max_seq_len,
-        embedding_size,
         hidden_size,
         ff_hidden_size,
         num_blocks=5,
@@ -17,21 +16,27 @@ class Decoder(nn.Module):
     ):
         super().__init__()
 
-        self.embedding = TransformerEmbedding(vocab_size, max_seq_len, embedding_size)
+        self.embedding = TransformerEmbedding(vocab_size, max_seq_len, hidden_size)
 
         self.decoder = []
-
         for _ in range(num_blocks):
             self.decoder.append(
                 DecoderBlock(
-                    in_size=embedding_size,
                     hidden_size=hidden_size,
                     ff_hidden_size=ff_hidden_size,
                     num_heads=num_heads,
                 )
             )
+        self.decoder = nn.ModuleList(self.decoder)
 
-        self.decoder = nn.Sequential(*self.decoder)
+        self.lin_final = nn.Linear(hidden_size, vocab_size)
 
-    def forward(self, x):
-        pass
+    def forward(self, tgt, src_enc):
+        tgt = self.embedding(tgt)
+
+        for block in self.decoder:
+            tgt = block(tgt, src_enc)
+
+        out = self.lin_final(tgt)
+
+        return out
