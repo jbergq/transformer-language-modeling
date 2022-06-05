@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 from .embedding.transformer_embedding import TransformerEmbedding
-from .layers.encoder_layer import EncoderBlock
+from .layers.encoder_block import EncoderBlock
 
 
 class Encoder(nn.Module):
@@ -11,6 +11,7 @@ class Encoder(nn.Module):
         max_seq_len,
         embedding_size,
         hidden_size,
+        ff_hidden_size,
         num_blocks=5,
         num_heads=8,
     ):
@@ -21,7 +22,14 @@ class Encoder(nn.Module):
         self.encoder = []
 
         for _ in range(num_blocks):
-            self.encoder.append(EncoderBlock(embedding_size, hidden_size, num_heads))
+            self.encoder.append(
+                EncoderBlock(
+                    in_size=embedding_size,
+                    hidden_size=hidden_size,
+                    ff_hidden_size=ff_hidden_size,
+                    num_heads=num_heads,
+                )
+            )
 
         self.encoder = nn.Sequential(*self.encoder)
 
