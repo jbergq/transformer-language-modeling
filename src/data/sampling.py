@@ -1,13 +1,14 @@
 import torch
 
 
-def sample_sequences(line, length, batch_size):
-    starts = torch.randint(size=(batch_size,), low=0, high=line.size(0) - length - 1)
+def sample_sequences(lines, length):
+    def get_start(line):
+        return torch.randint(size=(1,), low=0, high=len(line) - length - 1)
 
-    seqs_inputs = [line[start : start + length] for start in starts]
-    seqs_target = [line[start + 1 : start + length + 1] for start in starts]
+    starts = [get_start(line) for line in lines]
+    src_seqs = [line[start : start + length] for start, line in zip(starts, lines)]
+    tgt_seqs = [
+        line[start + 1 : start + length + 1] for start, line in zip(starts, lines)
+    ]
 
-    inputs = torch.cat([s[None, :] for s in seqs_inputs], dim=0).to(torch.long)
-    targets = torch.cat([s[None, :] for s in seqs_target], dim=0).to(torch.long)
-
-    return inputs, targets
+    return src_seqs, tgt_seqs

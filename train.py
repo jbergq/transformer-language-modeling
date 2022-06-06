@@ -1,34 +1,42 @@
-import torch
+from functools import partial
+
+from torch.utils.data import DataLoader
+from torch.hub import load_state_dict_from_url
+
+import torchtext.transforms as T
+import torchtext.functional as F
 from torchtext.datasets import IMDB
-from torchtext.data.utils import get_tokenizer
-from torchtext.vocab import build_vocab_from_iterator
 
 from src.model.transformer import Transformer
-from src.data.sampling import sample_sequences
+from src.data.preprocess import PreProcess
 
 
 SEQUENCE_LENGTH = 10
 BATCH_SIZE = 8
 
-tokenizer = get_tokenizer("basic_english")
-train_iter = IMDB(split="train")
+
+train_dp = IMDB(split="train")
+
+encoder_json_path = "https://download.pytorch.org/models/text/gpt2_bpe_encoder.json"
+vocab_bpe_path = "https://download.pytorch.org/models/text/gpt2_bpe_vocab.bpe"
+
+tokenizer = T.GPT2BPETokenizer(encoder_json_path, vocab_bpe_path)
+vocab_path = "https://download.pytorch.org/models/text/roberta.vocab.pt"
+vocab = load_state_dict_from_url(vocab_path)
+
+transform = PreProcess(tokenizer, vocab, SEQUENCE_LENGTH)
+
+train_dp = train_dp.batch(BATCH_SIZE).rows2columnar(["label", "text"])
+train_dp = train_dp.map(transform)
+train_dp = train_dp.map(partial(F.to_tensor, padding_value=1), input_col="source")
+train_dp = train_dp.map(partial(F.to_tensor, padding_value=1), input_col="target")
+
+train_dataloader = DataLoader(train_dp, batch_size=None)
+
+model = Transformer(len(vocab), 100, 128, 512)
 
 
-def yield_tokens(data_iter):
-    for _, text in data_iter:
-        yield tokenizer(text)
+for i, batch in enumerate(train_dataloader):
+    src, tgt = batch["source"], batch["target"]
 
-
-vocab = build_vocab_from_iterator(yield_tokens(train_iter), specials=["<unk>"])
-vocab.set_default_index(vocab["<unk>"])
-vocab_size = len(vocab)
-
-model = Transformer(vocab_size, 100, 128, 512)
-
-
-for i, (label, line) in enumerate(train_iter):
-    tokens = tokenizer(line)
-    token_ids = torch.tensor(vocab(tokens))
-
-    src, tgt = sample_sequences(token_ids, SEQUENCE_LENGTH, BATCH_SIZE)
     test = model(src, tgt)
