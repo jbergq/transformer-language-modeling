@@ -2,7 +2,6 @@ import torch.nn as nn
 
 import torchtext.transforms as T
 
-
 from src.data.sampling import sample_sequences
 
 
