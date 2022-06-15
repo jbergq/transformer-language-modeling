@@ -3,7 +3,8 @@ import torch
 
 def sample_sequences(lines, length):
     def get_start(line):
-        return torch.randint(size=(1,), low=0, high=len(line) - length - 1)
+        high = max(1, len(line) - length - 1)
+        return torch.randint(size=(1,), low=0, high=high)
 
     starts = [get_start(line) for line in lines]
     src_seqs = [line[start : start + length] for start, line in zip(starts, lines)]

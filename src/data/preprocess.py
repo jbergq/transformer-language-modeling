@@ -1,3 +1,4 @@
+import numpy as np
 import torch.nn as nn
 
 import torchtext.transforms as T
@@ -19,6 +20,7 @@ class PreProcess(nn.Module):
     def forward(self, input):
         tokens = self.tokenizer(input["text"])
         tokens = self.vocab(tokens)
+        tokens = np.array(tokens)
 
         src, tgt = sample_sequences(tokens, self.seq_length)
 
