@@ -20,7 +20,7 @@ class PreProcess(nn.Module):
     def forward(self, input):
         tokens = self.tokenizer(input["text"])
         tokens = self.vocab(tokens)
-        tokens = np.array(tokens)
+        tokens = np.array(tokens, dtype=object)
 
         src, tgt = sample_sequences(tokens, self.seq_length)
 
