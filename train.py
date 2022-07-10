@@ -1,6 +1,5 @@
 from functools import partial
 
-import torch
 import torch.nn as nn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
@@ -12,13 +11,8 @@ from torchtext.datasets import IMDB
 
 from src.model.transformer import Transformer
 from src.data.preprocess import PreProcess
-from src.utils.utils import iter_print, epoch_print
-
-NUM_EPOCHS = 10
-SEQUENCE_LENGTH = 10
-BATCH_SIZE = 8
-LR = 1e-5
-WEIGHT_DECAY = 5e-4
+from src.utils.print import iter_print, epoch_print
+from src.utils.config import load_config
 
 
 def train(model, dataloader, optimizer, criterion, epoch):
@@ -66,6 +60,8 @@ def validate(model, dataloader, criterion, epoch):
 
 
 def run():
+    cfg = load_config("config.yaml")
+
     train_dp, val_dp = IMDB(split=("train", "test"))
 
     encoder_json_path = "https://download.pytorch.org/models/text/gpt2_bpe_encoder.json"
@@ -75,14 +71,14 @@ def run():
     vocab_path = "https://download.pytorch.org/models/text/roberta.vocab.pt"
     vocab = load_state_dict_from_url(vocab_path)
 
-    transform = PreProcess(tokenizer, vocab, SEQUENCE_LENGTH)
+    transform = PreProcess(tokenizer, vocab, cfg.sequence_length)
 
-    train_dp = train_dp.batch(BATCH_SIZE).rows2columnar(["label", "text"])
+    train_dp = train_dp.batch(cfg.batch_size).rows2columnar(["label", "text"])
     train_dp = train_dp.map(transform)
     train_dp = train_dp.map(partial(F.to_tensor, padding_value=1), input_col="source")
     train_dp = train_dp.map(partial(F.to_tensor, padding_value=1), input_col="target")
 
-    val_dp = val_dp.batch(BATCH_SIZE).rows2columnar(["label", "text"])
+    val_dp = val_dp.batch(cfg.batch_size).rows2columnar(["label", "text"])
     val_dp = val_dp.map(transform)
     val_dp = val_dp.map(partial(F.to_tensor, padding_value=1), input_col="source")
     val_dp = val_dp.map(partial(F.to_tensor, padding_value=1), input_col="target")
@@ -91,10 +87,12 @@ def run():
     val_dataloader = DataLoader(val_dp, batch_size=None)
 
     model = Transformer(len(vocab), 100, 128, 512)
-    optimizer = Adam(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY, eps=5e-9)
+    optimizer = Adam(
+        model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay, eps=5e-9
+    )
     criterion = nn.CrossEntropyLoss(ignore_index=1)
 
-    for epoch in range(NUM_EPOCHS):
+    for epoch in range(cfg.num_epochs):
 
         train_losses = train(model, train_dataloader, optimizer, criterion, epoch)
 
