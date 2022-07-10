@@ -23,4 +23,4 @@ class Transformer(nn.Module):
     def create_lookahead_mask(self, tgt_seq_len):
         ones = torch.ones(tgt_seq_len, tgt_seq_len, dtype=torch.uint8)
 
-        return torch.triu(ones, diagonal=1).unsqueeze(0)
+        return torch.tril(ones, diagonal=0).unsqueeze(0)
