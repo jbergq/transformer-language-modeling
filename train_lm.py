@@ -4,11 +4,11 @@ import torch
 import torch.nn as nn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
-from torch.hub import load_state_dict_from_url
 
-import torchtext.transforms as T
 import torchtext.functional as F
+from torchtext.vocab import vocab as tt_vocab
 from torchtext.datasets import IMDB
+from transformers import GPT2Tokenizer
 
 from src.model.transformer import TransformerDecoder
 from src.data.preprocess import PreProcess
@@ -71,14 +71,10 @@ def run():
 
     train_dp, val_dp = IMDB(split=("train", "test"))
 
-    encoder_json_path = "https://download.pytorch.org/models/text/gpt2_bpe_encoder.json"
-    vocab_bpe_path = "https://download.pytorch.org/models/text/gpt2_bpe_vocab.bpe"
-
-    tokenizer = T.GPT2BPETokenizer(encoder_json_path, vocab_bpe_path)
-    vocab_path = "https://download.pytorch.org/models/text/roberta.vocab.pt"
-    vocab = load_state_dict_from_url(vocab_path)
-
-    transform = PreProcess(tokenizer, vocab, cfg.sequence_length)
+    # Tokenizer used by GPT-2.
+    tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+    vocab = tt_vocab(tokenizer.get_vocab())
+    transform = PreProcess(tokenizer, cfg.sequence_length)
 
     # Create datapipes for training and validation.
     # Each datapipe samples a batch and applies preprocessing.
