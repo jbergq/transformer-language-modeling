@@ -99,6 +99,13 @@ def run():
 
     logger = ExperimentLogger(log_dir="./experiments")
 
+    if cfg.print_example:
+        batch = next(iter(train_dataloader))
+        out = model.generate(torch.zeros((1, 1), dtype=torch.long))
+
+        print("Example sequence: ", tokenizer.decode(batch["target"][0].numpy()))
+        print("Model output: ", tokenizer.decode(out[0].numpy()))
+
     for epoch in range(cfg.num_epochs):
         train_losses = train(model, train_dataloader, optimizer, criterion, epoch)
         val_losses = validate(model, val_dataloader, criterion, epoch)
@@ -111,6 +118,9 @@ def run():
             step=epoch,
         )
         epoch_print(epoch, val_losses)
+
+        out = model.generate(torch.zeros((1, 1), dtype=torch.long))
+        print(tokenizer.decode(out[0].numpy()))
 
 
 if __name__ == "__main__":
