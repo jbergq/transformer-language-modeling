@@ -12,7 +12,12 @@ def iter_print(epoch, iter, train_loss):
 def epoch_print(epoch, val_losses):
     e_string = "=" * 45
 
+    num_val = len(val_losses)
+    val_sum = sum(val_losses)
+    val_mean = val_sum / num_val
+
     print("\n\n" + e_string)
     print("Epoch {epoch} done!".format(epoch=epoch))
-    print("Total validation loss: {val_loss:.3f}".format(val_loss=sum(val_losses)))
+    print("Total validation loss: {val_sum:.3f}".format(val_sum=val_sum))
+    print("Average validation loss: {val_mean:.3f}".format(val_mean=val_mean))
     print(e_string + "\n")
