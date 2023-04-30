@@ -10,7 +10,7 @@ import torchtext.transforms as T
 import torchtext.functional as F
 from torchtext.datasets import IMDB
 
-from src.model.transformer import Transformer
+from src.model.transformer import TransformerDecoder
 from src.data.preprocess import PreProcess
 from src.utils import ExperimentLogger, iter_print, epoch_print, load_config
 
@@ -21,9 +21,9 @@ def train(model, dataloader, optimizer, criterion, epoch):
     model.train()
 
     for i, batch in enumerate(dataloader):
-        src, tgt = batch["source"], batch["target"]
+        tgt = batch["target"]
 
-        out = model(src, tgt)
+        out = model(tgt)
 
         out_reshape = out.contiguous().view(-1, out.shape[-1])
         tgt_reshape = tgt.contiguous().view(-1)
@@ -36,6 +36,9 @@ def train(model, dataloader, optimizer, criterion, epoch):
         train_losses.append(loss_val)
         iter_print(epoch, i, loss_val)
 
+        if i == 10:
+            break
+
     return torch.tensor(train_losses)
 
 
@@ -45,9 +48,9 @@ def validate(model, dataloader, criterion, epoch):
     model.eval()
 
     for i, batch in enumerate(dataloader):
-        src, tgt = batch["source"], batch["target"]
+        tgt = batch["target"]
 
-        out = model(src, tgt)
+        out = model(tgt)
 
         out_reshape = out.contiguous().view(-1, out.shape[-1])
         tgt_reshape = tgt.contiguous().view(-1)
@@ -57,6 +60,8 @@ def validate(model, dataloader, criterion, epoch):
         loss_val = loss.item()
         val_losses.append(loss_val)
         iter_print(epoch, i, loss_val)
+
+        pred = out.softmax(dim=2).argmax(dim=2)
 
     return torch.tensor(val_losses)
 
@@ -75,6 +80,8 @@ def run():
 
     transform = PreProcess(tokenizer, vocab, cfg.sequence_length)
 
+    # Create datapipes for training and validation.
+    # Each datapipe samples a batch and applies preprocessing.
     train_dp = train_dp.batch(cfg.batch_size).rows2columnar(["label", "text"])
     train_dp = train_dp.map(transform)
     train_dp = train_dp.map(partial(F.to_tensor, padding_value=1), input_col="source")
@@ -88,7 +95,7 @@ def run():
     train_dataloader = DataLoader(train_dp, batch_size=None)
     val_dataloader = DataLoader(val_dp, batch_size=None)
 
-    model = Transformer(len(vocab), 100, 128, 512)
+    model = TransformerDecoder(len(vocab), 100, 128, 512)
     optimizer = Adam(
         model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay, eps=5e-9
     )
