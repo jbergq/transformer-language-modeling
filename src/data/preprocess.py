@@ -13,8 +13,8 @@ class PreProcess(nn.Module):
         self.tokenizer = tokenizer
         self.seq_length = seq_length
 
-        self.add_bos = T.AddToken(token=0, begin=True)
-        self.add_eos = T.AddToken(token=2, begin=False)
+        self.add_bos = T.AddToken(token=tokenizer.bos_token_id, begin=True)
+        self.add_eos = T.AddToken(token=tokenizer.eos_token_id, begin=False)
 
     def forward(self, input):
         # Tokenize text.
