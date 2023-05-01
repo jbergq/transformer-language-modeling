@@ -13,7 +13,6 @@ class PreProcess(nn.Module):
         self.tokenizer = tokenizer
         self.seq_length = seq_length
 
-        self.add_bos = T.AddToken(token=tokenizer.bos_token_id, begin=True)
         self.add_eos = T.AddToken(token=tokenizer.eos_token_id, begin=False)
 
     def forward(self, input):
@@ -24,8 +23,7 @@ class PreProcess(nn.Module):
         # Sample sequences with the target equal to the source shifted by one.
         src, tgt = sample_sequences(tokens, self.seq_length)
 
-        # Add tokens to mark start and end of each sequence.
-        src, tgt = self.add_bos(src), self.add_bos(tgt)
+        # Add EOS token to mark end of each sequence.
         src, tgt = self.add_eos(src), self.add_eos(tgt)
 
         input["source"] = src
