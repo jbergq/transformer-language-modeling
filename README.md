@@ -11,3 +11,7 @@ Goal is to complete the following:
 - [ ] Load custom scraped dataset
 - [ ] Support training on GCP
 - [ ] Train model and verify convergence
+
+## Usage
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/jbergq/transformer/blob/main/train.ipynb)
