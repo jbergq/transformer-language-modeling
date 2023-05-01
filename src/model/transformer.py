@@ -7,11 +7,11 @@ from .decoder import Decoder
 
 
 class Transformer(nn.Module):
-    def __init__(self, block_size):
+    def __init__(self, max_seq_len):
         super().__init__()
 
-        self.block_size = block_size
-        self.register_buffer("tri", torch.tril(torch.ones(block_size, block_size)))
+        self.max_seq_len = max_seq_len
+        self.register_buffer("tri", torch.tril(torch.ones(max_seq_len, max_seq_len)))
 
     def create_lookahead_mask(self, tgt_seq_len):
         return self.tri[:tgt_seq_len, :tgt_seq_len].unsqueeze(0)
@@ -26,7 +26,9 @@ class Transformer(nn.Module):
         eos_mask = torch.zeros((B, 1), dtype=torch.bool, device=device)
 
         for _ in range(max_output_len):
-            out = self.forward(seq[..., -self.block_size :])  # Truncate input sequence.
+            out = self.forward(
+                seq[..., -self.max_seq_len :]  # Truncate input sequence to max length.
+            )
             probs = F.softmax(out[:, -1, :], dim=1)
             next_tokens = torch.multinomial(probs, num_samples=1)
 
@@ -52,10 +54,8 @@ class Transformer(nn.Module):
 class TransformerEncoderDecoder(Transformer):
     """Transformer encoder-decoder, using cross-attention with encoded input sequence when decoding output."""
 
-    def __init__(
-        self, vocab_size, max_seq_len, hidden_size, ff_hidden_size, block_size
-    ):
-        super().__init__(block_size)
+    def __init__(self, vocab_size, max_seq_len, hidden_size, ff_hidden_size):
+        super().__init__(max_seq_len)
 
         self.encoder = Encoder(vocab_size, max_seq_len, hidden_size, ff_hidden_size)
         self.decoder = Decoder(vocab_size, max_seq_len, hidden_size, ff_hidden_size)
@@ -72,10 +72,8 @@ class TransformerEncoderDecoder(Transformer):
 class TransformerDecoder(Transformer):
     """Transformer decoder, using auto-regressive decoder blocks for language modeling."""
 
-    def __init__(
-        self, vocab_size, max_seq_len, hidden_size, ff_hidden_size, block_size
-    ):
-        super().__init__(block_size)
+    def __init__(self, vocab_size, max_seq_len, hidden_size, ff_hidden_size):
+        super().__init__(max_seq_len)
 
         self.decoder = Decoder(vocab_size, max_seq_len, hidden_size, ff_hidden_size)
 
