@@ -52,7 +52,7 @@ class Transformer(nn.Module):
 
 
 class TransformerEncoderDecoder(Transformer):
-    """Transformer encoder-decoder, using cross-attention with encoded input sequence when decoding output."""
+    """Transformer encoder-decoder, using cross-attention with encoded source domain sequence when decoding output."""
 
     def __init__(self, vocab_size, max_seq_len, hidden_size, ff_hidden_size):
         super().__init__(max_seq_len)
@@ -60,11 +60,11 @@ class TransformerEncoderDecoder(Transformer):
         self.encoder = Encoder(vocab_size, max_seq_len, hidden_size, ff_hidden_size)
         self.decoder = Decoder(vocab_size, max_seq_len, hidden_size, ff_hidden_size)
 
-    def forward(self, src, tgt):
-        tgt_mask = self.create_lookahead_mask(tgt.shape[1])
+    def forward(self, x, src):
+        decoder_lookahead_mask = self.create_lookahead_mask(x.shape[1])
 
         src_enc = self.encoder(src)
-        out = self.decoder(tgt, src_enc, tgt_mask)
+        out = self.decoder(x, src_enc, decoder_lookahead_mask)
 
         return out
 
@@ -77,9 +77,9 @@ class TransformerDecoder(Transformer):
 
         self.decoder = Decoder(vocab_size, max_seq_len, hidden_size, ff_hidden_size)
 
-    def forward(self, tgt):
-        tgt_mask = self.create_lookahead_mask(tgt.shape[1])
+    def forward(self, x):
+        lookahead_mask = self.create_lookahead_mask(x.shape[1])
 
-        out = self.decoder(tgt, None, tgt_mask)
+        out = self.decoder(x, None, lookahead_mask)
 
         return out

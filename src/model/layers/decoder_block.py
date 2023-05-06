@@ -29,13 +29,14 @@ class DecoderBlock(nn.Module):
         self.norm3 = nn.LayerNorm(hidden_size, eps=layer_norm_eps)
         self.dropout3 = nn.Dropout(dropout_prob)
 
-    def forward(self, tgt, src=None, tgt_mask=None):
-        x_a = self.attention1(q=tgt, k=tgt, v=tgt, mask=tgt_mask)
+    def forward(self, x, src=None, lookahead_mask=None):
+        x_a = self.attention1(q=x, k=x, v=x, mask=lookahead_mask)
 
-        x = self.norm1(tgt + x_a)
+        x = self.norm1(x + x_a)
         x = self.dropout1(x)
 
         if src is not None:
+            # Cross-attention with source domain.
             x_a = self.enc_dec_attention(q=x, k=src, v=src)
 
             x = self.norm2(x + x_a)

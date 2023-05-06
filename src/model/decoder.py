@@ -26,12 +26,12 @@ class Decoder(nn.Module):
 
         self.lin_final = nn.Linear(hidden_size, vocab_size)
 
-    def forward(self, tgt, src_enc=None, tgt_mask=None):
-        tgt = self.embedding(tgt)
+    def forward(self, x, src_enc=None, lookahead_mask=None):
+        x = self.embedding(x)
 
         for block in self.decoder:
-            tgt = block(tgt, src_enc, tgt_mask)
+            x = block(x, src_enc, lookahead_mask)
 
-        out = self.lin_final(tgt)
+        out = self.lin_final(x)
 
         return out
