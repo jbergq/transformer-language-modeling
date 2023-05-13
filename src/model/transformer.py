@@ -55,11 +55,33 @@ class Transformer(nn.Module):
 class TransformerEncoderDecoder(Transformer):
     """Transformer encoder-decoder, using cross-attention with encoded source domain sequence when decoding output."""
 
-    def __init__(self, vocab_size, max_seq_len, hidden_size, ff_hidden_size):
+    def __init__(
+        self,
+        vocab_size,
+        max_seq_len,
+        hidden_size,
+        ff_hidden_size,
+        num_blocks=5,
+        num_heads=8,
+    ):
         super().__init__(max_seq_len)
 
-        self.encoder = Encoder(vocab_size, max_seq_len, hidden_size, ff_hidden_size)
-        self.decoder = Decoder(vocab_size, max_seq_len, hidden_size, ff_hidden_size)
+        self.encoder = Encoder(
+            vocab_size,
+            max_seq_len,
+            hidden_size,
+            ff_hidden_size,
+            num_blocks,
+            num_heads,
+        )
+        self.decoder = Decoder(
+            vocab_size,
+            max_seq_len,
+            hidden_size,
+            ff_hidden_size,
+            num_blocks,
+            num_heads,
+        )
 
     def forward(self, x, src):
         decoder_lookahead_mask = self.create_lookahead_mask(x.shape[1])
@@ -73,10 +95,25 @@ class TransformerEncoderDecoder(Transformer):
 class TransformerDecoder(Transformer):
     """Transformer decoder, using auto-regressive decoder blocks for language modeling."""
 
-    def __init__(self, vocab_size, max_seq_len, hidden_size, ff_hidden_size):
+    def __init__(
+        self,
+        vocab_size,
+        max_seq_len,
+        hidden_size,
+        ff_hidden_size,
+        num_blocks=5,
+        num_heads=8,
+    ):
         super().__init__(max_seq_len)
 
-        self.decoder = Decoder(vocab_size, max_seq_len, hidden_size, ff_hidden_size)
+        self.decoder = Decoder(
+            vocab_size,
+            max_seq_len,
+            hidden_size,
+            ff_hidden_size,
+            num_blocks,
+            num_heads,
+        )
 
     def forward(self, x):
         lookahead_mask = self.create_lookahead_mask(x.shape[1])
