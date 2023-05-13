@@ -21,6 +21,7 @@ class DecoderBlock(nn.Module):
         self.dropout1 = nn.Dropout(dropout_prob)
 
         self.enc_dec_attention = MultiHeadAttention(hidden_size, hidden_size, num_heads)
+        self.enc_norm = nn.LayerNorm(hidden_size, eps=layer_norm_eps)
         self.norm2 = nn.LayerNorm(hidden_size, eps=layer_norm_eps)
         self.dropout2 = nn.Dropout(dropout_prob)
 
@@ -30,21 +31,21 @@ class DecoderBlock(nn.Module):
         self.dropout3 = nn.Dropout(dropout_prob)
 
     def forward(self, x, src=None, lookahead_mask=None):
-        x_a = self.attention1(q=x, k=x, v=x, mask=lookahead_mask)
+        x_n = self.norm1(x)
+        x_a = self.attention1(q=x_n, k=x_n, v=x_n, mask=lookahead_mask)
 
-        x = self.norm1(x + x_a)
-        x = self.dropout1(x)
+        x = self.dropout1(x + x_a)
 
         if src is not None:
             # Cross-attention with source domain.
-            x_a = self.enc_dec_attention(q=x, k=src, v=src)
+            x_n = self.norm2(x)
+            src_n = self.enc_norm(src)
+            x_a = self.enc_dec_attention(q=x_n, k=src_n, v=src_n)
 
-            x = self.norm2(x + x_a)
-            x = self.dropout2(x)
+            x = self.dropout2(x + x_a)
 
-        x_f = self.ff_block(x)
+        x_f = self.ff_block(self.norm3(x))
 
-        x = self.norm3(x + x_f)
-        x = self.dropout3(x)
+        x = self.dropout3(x + x_f)
 
         return x
