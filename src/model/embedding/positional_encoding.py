@@ -18,3 +18,13 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         return self.pos_embeddings[: x.shape[1], :]
+
+
+class PositionalEncodingLearned(nn.Module):
+    def __init__(self, max_seq_len, embedding_size) -> None:
+        super().__init__()
+
+        self.pos_emb = nn.Embedding(max_seq_len, embedding_size)
+
+    def forward(self, x):
+        return self.pos_emb(torch.arange(x.shape[1], device=x.device))

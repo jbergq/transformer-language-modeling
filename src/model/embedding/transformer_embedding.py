@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 from .token_embedding import TokenEmbedding
-from .positional_encoding import PositionalEncoding
+from .positional_encoding import PositionalEncodingLearned as PositionalEncoding
 
 
 class TransformerEmbedding(nn.Module):
