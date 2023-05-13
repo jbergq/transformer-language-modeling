@@ -24,6 +24,7 @@ class Decoder(nn.Module):
 
         self.decoder = nn.ModuleList(self.decoder)
 
+        self.ln_final = nn.LayerNorm(hidden_size)
         self.lin_final = nn.Linear(hidden_size, vocab_size)
 
     def forward(self, x, src_enc=None, lookahead_mask=None):
@@ -32,6 +33,6 @@ class Decoder(nn.Module):
         for block in self.decoder:
             x = block(x, src_enc, lookahead_mask)
 
-        out = self.lin_final(x)
+        out = self.lin_final(self.ln_final(x))
 
         return out
