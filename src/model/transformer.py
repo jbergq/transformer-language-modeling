@@ -16,6 +16,7 @@ class Transformer(nn.Module):
     def create_lookahead_mask(self, tgt_seq_len):
         return self.tri[:tgt_seq_len, :tgt_seq_len].unsqueeze(0)
 
+    @torch.no_grad()
     def generate(self, inp_seq, eos_token_id=2, max_output_len=100):
         B, T = inp_seq.shape
         device = inp_seq.device
