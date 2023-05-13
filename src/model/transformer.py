@@ -17,14 +17,8 @@ class Transformer(nn.Module):
         return self.tri[:tgt_seq_len, :tgt_seq_len].unsqueeze(0)
 
     @torch.no_grad()
-    def generate(self, inp_seq, eos_token_id=2, max_output_len=100):
-        B, T = inp_seq.shape
-        device = inp_seq.device
-
+    def generate(self, inp_seq, max_output_len=100):
         seq = inp_seq
-
-        # Create mask for checking which generated sequences have encountered end-of-sequence (EOS) tokens.
-        eos_mask = torch.zeros((B, 1), dtype=torch.bool, device=device)
 
         for _ in range(max_output_len):
             out = self.forward(
@@ -33,21 +27,8 @@ class Transformer(nn.Module):
             probs = F.softmax(out[:, -1, :], dim=1)
             next_tokens = torch.multinomial(probs, num_samples=1)
 
-            # Check for EOS and update mask.
-            has_eos = next_tokens == eos_token_id
-            eos_mask = eos_mask | has_eos
-
-            # Set the next tokens to EOS tokens for sequences that have already encountered an EOS.
-            next_tokens = torch.where(
-                eos_mask, torch.tensor(eos_token_id, device=device), next_tokens
-            )
-
             # Append the next tokens to the generated sequences.
             seq = torch.cat((seq, next_tokens), dim=-1)
-
-            # Break if all sequences have encountered an EOS token.
-            if eos_mask.all():
-                break
 
         return seq
 
