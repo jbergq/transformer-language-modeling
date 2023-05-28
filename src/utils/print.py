@@ -1,3 +1,18 @@
+from src.utils.params import count_model_params
+
+
+def train_start_print(model):
+    e_string = "=" * 45
+
+    num_params = count_model_params(model)
+    num_params_m = num_params / 1e6
+
+    print("\n" + e_string)
+    print("Starting training!")
+    print("Num model params: {num_params_m:.3f}M".format(num_params_m=num_params_m))
+    print(e_string + "\n")
+
+
 def iter_print(iter, train_loss, newline_interval=50):
     l_string = "-" * 45
     f_str = "{: <10} {: <10.5}"
