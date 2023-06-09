@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 from .encoder import Encoder
 from .decoder import Decoder
@@ -15,22 +14,6 @@ class Transformer(nn.Module):
 
     def create_lookahead_mask(self, tgt_seq_len):
         return self.tri[:tgt_seq_len, :tgt_seq_len].unsqueeze(0)
-
-    @torch.no_grad()
-    def generate(self, inp_seq, max_output_len=100):
-        seq = inp_seq
-
-        for _ in range(max_output_len):
-            out = self.forward(
-                seq[..., -self.max_seq_len :]  # Truncate input sequence to max length.
-            )
-            probs = F.softmax(out[:, -1, :], dim=1)
-            next_tokens = torch.multinomial(probs, num_samples=1)
-
-            # Append the next tokens to the generated sequences.
-            seq = torch.cat((seq, next_tokens), dim=-1)
-
-        return seq
 
 
 class TransformerEncoderDecoder(Transformer):
