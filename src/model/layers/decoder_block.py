@@ -11,6 +11,7 @@ class DecoderBlock(nn.Module):
         hidden_size,
         ff_hidden_size,
         num_heads,
+        use_cross_attn,
         dropout_prob=0.1,
         layer_norm_eps=1e-5,
     ):
@@ -20,10 +21,13 @@ class DecoderBlock(nn.Module):
         self.norm1 = nn.LayerNorm(hidden_size, eps=layer_norm_eps)
         self.dropout1 = nn.Dropout(dropout_prob)
 
-        self.enc_dec_attention = MultiHeadAttention(hidden_size, hidden_size, num_heads)
-        self.enc_norm = nn.LayerNorm(hidden_size, eps=layer_norm_eps)
-        self.norm2 = nn.LayerNorm(hidden_size, eps=layer_norm_eps)
-        self.dropout2 = nn.Dropout(dropout_prob)
+        if use_cross_attn:
+            self.enc_dec_attention = MultiHeadAttention(
+                hidden_size, hidden_size, num_heads
+            )
+            self.enc_norm = nn.LayerNorm(hidden_size, eps=layer_norm_eps)
+            self.norm2 = nn.LayerNorm(hidden_size, eps=layer_norm_eps)
+            self.dropout2 = nn.Dropout(dropout_prob)
 
         self.ff_block = FeedForwardBlock(hidden_size, ff_hidden_size, dropout_prob)
 

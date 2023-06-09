@@ -45,6 +45,7 @@ class TransformerEncoderDecoder(Transformer):
             ff_hidden_size,
             num_blocks,
             num_heads,
+            use_cross_attn=True,
         )
 
     def forward(self, x, src):
@@ -77,6 +78,7 @@ class TransformerDecoder(Transformer):
             ff_hidden_size,
             num_blocks,
             num_heads,
+            use_cross_attn=False,
         )
 
     def forward(self, x):

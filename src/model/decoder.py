@@ -13,6 +13,7 @@ class Decoder(nn.Module):
         ff_hidden_size,
         num_blocks=5,
         num_heads=8,
+        use_cross_attn=False,
     ):
         super().__init__()
 
@@ -20,7 +21,14 @@ class Decoder(nn.Module):
 
         self.decoder = []
         for _ in range(num_blocks):
-            self.decoder.append(DecoderBlock(hidden_size, ff_hidden_size, num_heads))
+            self.decoder.append(
+                DecoderBlock(
+                    hidden_size,
+                    ff_hidden_size,
+                    num_heads,
+                    use_cross_attn,
+                )
+            )
 
         self.decoder = nn.ModuleList(self.decoder)
 
