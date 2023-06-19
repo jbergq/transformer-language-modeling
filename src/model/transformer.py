@@ -6,11 +6,11 @@ from .decoder import Decoder
 
 
 class Transformer(nn.Module):
-    def __init__(self, max_seq_len):
+    def __init__(self, context_size):
         super().__init__()
 
-        self.max_seq_len = max_seq_len
-        self.register_buffer("tri", torch.tril(torch.ones(max_seq_len, max_seq_len)))
+        self.context_size = context_size
+        self.register_buffer("tri", torch.tril(torch.ones(context_size, context_size)))
 
     def create_lookahead_mask(self, tgt_seq_len):
         return self.tri[:tgt_seq_len, :tgt_seq_len].unsqueeze(0)
@@ -22,17 +22,17 @@ class TransformerEncoderDecoder(Transformer):
     def __init__(
         self,
         vocab_size,
-        max_seq_len,
+        context_size,
         hidden_size,
         ff_hidden_size,
         num_blocks=5,
         num_heads=8,
     ):
-        super().__init__(max_seq_len)
+        super().__init__(context_size)
 
         self.encoder = Encoder(
             vocab_size,
-            max_seq_len,
+            context_size,
             hidden_size,
             ff_hidden_size,
             num_blocks,
@@ -40,7 +40,7 @@ class TransformerEncoderDecoder(Transformer):
         )
         self.decoder = Decoder(
             vocab_size,
-            max_seq_len,
+            context_size,
             hidden_size,
             ff_hidden_size,
             num_blocks,
@@ -63,17 +63,17 @@ class TransformerDecoder(Transformer):
     def __init__(
         self,
         vocab_size,
-        max_seq_len,
+        context_size,
         hidden_size,
         ff_hidden_size,
         num_blocks=5,
         num_heads=8,
     ):
-        super().__init__(max_seq_len)
+        super().__init__(context_size)
 
         self.decoder = Decoder(
             vocab_size,
-            max_seq_len,
+            context_size,
             hidden_size,
             ff_hidden_size,
             num_blocks,
