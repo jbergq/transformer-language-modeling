@@ -8,7 +8,7 @@ class Encoder(nn.Module):
     def __init__(
         self,
         vocab_size,
-        max_seq_len,
+        context_size,
         hidden_size,
         ff_hidden_size,
         num_blocks=5,
@@ -16,7 +16,7 @@ class Encoder(nn.Module):
     ):
         super().__init__()
 
-        self.embedding = TransformerEmbedding(vocab_size, max_seq_len, hidden_size)
+        self.embedding = TransformerEmbedding(vocab_size, context_size, hidden_size)
 
         self.encoder = []
         for _ in range(num_blocks):
