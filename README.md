@@ -1,21 +1,9 @@
-# transformer
-
-Yet another implementation of the Transformer model from the [Attention Is All You Need](https://arxiv.org/abs/1706.03762?context=cs) paper.
-
-## Tasks
-
-Goal is to complete the following:
-
-- [x] Transformer model
-- [x] Training pipeline
-- [x] Load WebText dataset
-- [ ] Train model and verify convergence
-- [ ] Reproduce GPT-2 small results on LAMBADA dataset
-
-## Usage
+# Transformer Language Modeling
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/jbergq/transformer/blob/main/train.ipynb)
 
-## Other
+Notebook showing how to implement a decoder transformer model and train it for language modeling on the WebText dataset.
 
-For details around LAMBADA evaluation, see this [thread](https://github.com/huggingface/transformers/issues/491)
+> Note: Work in progress!
+
+<img src="images/transformer_decoder_preln.svg" height=720></img>
